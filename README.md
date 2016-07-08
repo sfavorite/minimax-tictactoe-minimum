@@ -6,6 +6,6 @@ computers move.
 You can compile this with gcc (or clang):
 
 ```c
-gcc -o tictactoe main.
+gcc -o tictactoe main.c
 
 ```
