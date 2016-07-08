@@ -138,13 +138,13 @@ int minimax(int depth, bool isMax, char board[3][3], struct move * bestMove)
 }
 
 void findBestMove(char board[3][3]) {
-    int score = -999;
+    int s = -999;
     struct move bestMove;
     bestMove.row = -1;
     bestMove.col = -1;
 
     // Get the best score & move possible
-    score = minimax(1, true, board, &bestMove);
+    s = minimax(1, true, board, &bestMove);
 
     printf("Best move is: row = %d col = %d\n", bestMove.row, bestMove.col);
     printf("move value: %d\n", s);
@@ -152,15 +152,15 @@ void findBestMove(char board[3][3]) {
     // Make the move we just learned.
     board[bestMove.row][bestMove.col] = 'x';
     // What is the score now?
-    score = score(board);
-    printf("Score is: %d\n", score);
-    if (score == 10) {
+    s = score(board);
+    printf("Score is: %d\n", s);
+    if (s == 10) {
         printf("Computer wins\n");
     }
-    else if (score == -10) {
+    else if (s == -10) {
         printf("Player wins\n");
     }
-    else if (score == 0 && !MovesLeft(board)) {
+    else if (s == 0 && !MovesLeft(board)) {
         printf("Tie game\n");
     }
 }
