@@ -1,8 +1,9 @@
-// A simple C++ program to find maximum score that
+// A simple C program to find maximum score that
 // maximizing player can get.
 #include <stdio.h>
 #include <stdbool.h>
 
+// Basic declarations
 int number_of_cells = 9;
 int total_calls = 0;
 
@@ -11,9 +12,10 @@ struct move {
     int col;
 };
 
-char player = 'o';
-char opponent = 'x';
+char player = 'x';
+char opponent = 'o';
 
+// Hoe many moves are left on the board.
 bool MovesLeft(char board[3][3]) {
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
@@ -22,6 +24,10 @@ bool MovesLeft(char board[3][3]) {
     return false;
 }
 
+// What is the current score of the game.
+// Win for X = 10
+// Win for Y = -10
+// Tie game = 0
 int score(char b[3][3]) {
     // Check rows for a win.
     for (int row = 0; row < 3; row++) {
@@ -44,6 +50,7 @@ int score(char b[3][3]) {
         }
     }
     // Check diagonals for a win.
+    // Left to right
     if (b[0][0] == b[1][1] && b[1][1] == b[2][2])
     {
         if (b[0][0] == player)
@@ -51,7 +58,7 @@ int score(char b[3][3]) {
         else if (b[0][0] == opponent)
             return -10;
     }
-
+    // Right to left
     if (b[0][2] == b[1][1] && b[1][1] == b[2][0]) {
         if (b[0][2] == player)
             return 10;
@@ -63,41 +70,41 @@ int score(char b[3][3]) {
 }
 
 // Returns the optimal value a maximizer can obtain.
-// depth is current depth in game tree.
-// nodeIndex is index of current node in scores[].
-// isMax is true if current move is of maximizer, else false
-// scores[] stores leaves of Game tree.
-// h is maximum height of Game tree
+// Depth is current depth in game tree.
+// isMax is true if current move is of maximizer (X)
 int minimax(int depth, bool isMax, char board[3][3], struct move * bestMove)
 {
 
+    // See if we should keep going.
     int currentScore = score(board);
     if (currentScore == 10 || currentScore == -10) {
         return currentScore;
     }
 
+    // How many times have we executed minimax
     ++total_calls;
 
-    // Have we hit our search depth.
-    if (!MovesLeft(board)) {
-        //printf("hit bottom...heading up. Score is %d\n", currentScore);
+    // Have we hit our search depth (In this example it is all moves possible)
+    if (!MovesLeft(board))
         return currentScore;
-    }
 
     int currentValue;
     int bestScore;
     if (isMax) {
+        // Set bestScore to lower than possible...everyting else is a better choice.
         bestScore = -100;
         for (int row = 0; row < 3; ++row)
             for (int col = 0; col < 3; ++col) {
+                // If we have an empty square let's find out if it helps us.
                 if (board[row][col] == '_') {
                     board[row][col] = player;
 
                     currentValue = minimax(depth + 1, false, board, bestMove);
+                    // Remove the last move made.
                     board[row][col] = '_';
 
+                    // Did we find a better move then we had?
                     if (currentValue > bestScore) {
-                        //printf("X currentValue %d is higher then bestValue %d\n", currentValue, bestScore);
                         bestScore = currentValue - depth;
                         bestMove->row = row;
                         bestMove->col = col;
@@ -105,17 +112,20 @@ int minimax(int depth, bool isMax, char board[3][3], struct move * bestMove)
                 }
             }
     } else {
+        // Set bestScore to higher than possible...everyting else is a better choice.
         bestScore = 100;
         for (int row = 0; row < 3; ++row)
             for (int col = 0; col < 3; ++col) {
+                // If we have an empty square let's find out if it helps us.
                 if (board[row][col] == '_') {
 
                     board[row][col] = opponent;
 
                     currentValue = minimax(depth + 1, true, board, bestMove);
-
+                    // Remove the last move made.
                     board[row][col] = '_';
 
+                    // Did we find a better move then we had?
                     if (currentValue < bestScore) {
                         bestScore = currentValue + depth;
                         bestMove->row = row;
@@ -128,47 +138,45 @@ int minimax(int depth, bool isMax, char board[3][3], struct move * bestMove)
 }
 
 void findBestMove(char board[3][3]) {
-    int s = -999;
+    int score = -999;
     struct move bestMove;
     bestMove.row = -1;
     bestMove.col = -1;
 
+    // Get the best score & move possible
+    score = minimax(1, true, board, &bestMove);
 
-        s = minimax(1, true, board, &bestMove);
+    printf("Best move is: row = %d col = %d\n", bestMove.row, bestMove.col);
+    printf("move value: %d\n", s);
 
-        printf("Best move is: row = %d col = %d\n", bestMove.row, bestMove.col);
-        printf("move value: %d\n", s);
-
-        board[bestMove.row][bestMove.col] = 'x';
-        s = score(board);
-        printf("Score is: %d\n", s);
-        if (s == 10) {
-            printf("Computer wins\n");
-        }
-        else if (s == -10) {
-            printf("Player wins\n");
-        }
-        else if (s == 0 && !MovesLeft(board)) {
-            printf("Tie game\n");
-        }
+    // Make the move we just learned.
+    board[bestMove.row][bestMove.col] = 'x';
+    // What is the score now?
+    score = score(board);
+    printf("Score is: %d\n", score);
+    if (score == 10) {
+        printf("Computer wins\n");
+    }
+    else if (score == -10) {
+        printf("Player wins\n");
+    }
+    else if (score == 0 && !MovesLeft(board)) {
+        printf("Tie game\n");
+    }
 }
 
 int main()
 {
     // Setup a tic-tac-toe board
     char board[3][3] = {
-/*
-        { '_', '_', '_'},
-        { '_', '_', '_'},
-        { '_', '_', '_'}
-        */
-
+        // An interesting board for the computer to think about.
         { '_', 'x', '_'},
-        { '_', '_', 'x'},
+        { '_', 'o', 'x'},
         { 'o', 'o', 'x'}
 
 };
 
+    // Given the board above what is the best move X can make.
     findBestMove(board);
 
     printf("Total calls: %d\n", total_calls);
